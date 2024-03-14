@@ -251,6 +251,8 @@ $salesOrder->status()->transitionTo(
 );
 ```
 
+You can define a custom default responsible by defining the function  ``getDefaultStateMachineResponible()`` within the model class.
+
 When applying the transition, the state machine will verify if the state transition is allowed according
 to the `transitions()` states we've defined. If the transition is not allowed, a `TransitionNotAllowed`
 exception will be thrown.

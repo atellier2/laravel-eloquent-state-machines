@@ -86,6 +86,25 @@ abstract class StateMachine
         return $this->pendingTransitions()->notApplied()->exists();
     }
 
+
+    /**
+     * Get the responsible of the transition/creation process
+     *
+     * @param User $responsible
+     * @return User
+     */
+    public function getResponsible($responsible = null){
+        if(!$responsible){
+            if(method_exists($this->model, 'getDefaultStateMachineResponible')){
+                $responsible = $this->model->getDefaultStateMachineResponible();
+            } else {
+                $responsible= auth()->user();
+            }
+        } 
+        return $responsible;
+    }
+
+
     /**
      * @param $from
      * @param $to
@@ -124,8 +143,8 @@ abstract class StateMachine
         $this->model->save();
 
         if ($this->recordHistory()) {
-            $responsible = $responsible ?? auth()->user();
-
+            $responsible = $this->getResponsible($responsible);
+    
             $this->model->recordState($field, $from, $to, $customProperties, $responsible, $changedAttributes);
         }
 
@@ -158,7 +177,7 @@ abstract class StateMachine
             throw new TransitionNotAllowedException($from, $to, get_class($this->model));
         }
 
-        $responsible = $responsible ?? auth()->user();
+        $responsible = $this->getResponsible($responsible);
 
         return $this->model->recordPendingTransition(
             $this->field,
